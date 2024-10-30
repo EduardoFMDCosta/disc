@@ -1,4 +1,6 @@
 from casadi import *
+import numpy as np
+import matplotlib.pyplot as plt
 
 class Dynamics:
     def __init__(self, params, integrator):
@@ -6,7 +8,6 @@ class Dynamics:
         self.Ma = params['Ma']
         self.l = params['l']
         self.g = params['g']
-        self.T = params['T']
         self.Ts = params['Ts']
 
         self.integrator = integrator
@@ -86,3 +87,35 @@ class Dynamics:
 
         else:
             raise Exception("Not implemented")
+
+
+    def simulate_integrated_dynamics(self, x0, u, T):
+
+        F = self.integrated_dynamics['F']
+
+        # Simulate the trajectory
+        x_traj = [x0]
+        x_current = x0
+        for t in range(T):
+            res = F(x0=x_current, p=u[t])
+            x_next = res['xf'].full().flatten()
+            x_traj.append(x_next)
+            x_current = x_next
+
+        # Convert trajectory to numpy array for easy plotting
+        x_traj = np.array(x_traj)
+        return x_traj
+
+    def plot_trajectory(self, x_traj, T):
+        # Plot the trajectory
+        plt.figure(figsize=(10, 5))
+        plt.plot(np.arange(T + 1) * self.Ts, x_traj[:, 0], label='x')
+        plt.plot(np.arange(T + 1) * self.Ts, x_traj[:, 1], label='theta')
+        plt.plot(np.arange(T + 1) * self.Ts, x_traj[:, 2], label='x_dot')
+        plt.plot(np.arange(T + 1) * self.Ts, x_traj[:, 3], label='theta_dot')
+        plt.xlabel('Time [s]')
+        plt.ylabel('State')
+        plt.title('System Trajectory')
+        plt.legend()
+        plt.grid(True)
+        plt.show()
