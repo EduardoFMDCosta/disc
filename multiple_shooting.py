@@ -13,6 +13,8 @@ def multiple_shooting(int_dynamics, T, x0, u0):
     w0 = []
     J = 0.0
     g=[]
+    lbg = []
+    ubg = []
 
     # "Lift" initial conditions
     Xk = MX.sym('X0', 4)
@@ -20,8 +22,10 @@ def multiple_shooting(int_dynamics, T, x0, u0):
     w0 += [*x0]
 
     # Initial condition constraint
-    x_init = MX.sym('x_init', 4)
-    g += [Xk - x_init]
+    #x_init = MX.sym('x_init', 4)
+    g += [Xk - x0]
+    lbg += [0, 0, 0, 0]
+    ubg += [0, 0, 0, 0]
 
     # Formulate the NLP
     for k in range(T):
@@ -38,20 +42,22 @@ def multiple_shooting(int_dynamics, T, x0, u0):
         # New NLP variable for state at end of interval
         Xk = MX.sym('X_' + str(k+1), 4)
         w   += [Xk]
-        w0  += [*x0]
+        w0  += [0, 0, 0, 0]
 
         # Add equality constraint
         g += [Xk_end - Xk]
+        lbg += [0, 0, 0, 0]
+        ubg += [0, 0, 0, 0]
 
     # Create an NLP solver
-    prob = {'f': J, 'x': vertcat(*w), 'g': vertcat(*g), 'p':vertcat(x_init)}
-    solver = nlpsol('solver', 'ipopt', prob)
+    nlp = {'f': J, 'x': vertcat(*w), 'g': vertcat(*g)}
+    solver = nlpsol('solver', 'ipopt', nlp)
 
     # Solve the NLP
-    sol = solver(x0=w0, p=x0)
+    sol = solver(x0 = w0, lbg = lbg, ubg = ubg)
     w_opt = sol['x'].full().flatten()
 
-    return w_opt
+    return w_opt, nlp
 
 def plot_multiple_shooting(w_opt, Ts, T):
     # Plot the solution
