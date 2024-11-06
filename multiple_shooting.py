@@ -59,7 +59,7 @@ def multiple_shooting(int_dynamics, T, x0, u0):
 
     return w_opt, nlp
 
-def plot_multiple_shooting(w_opt, Ts, T):
+def plot_multiple_shooting(w_opt, Ts, T, title):
     # Plot the solution
     x1_opt = w_opt[0::5]
     x2_opt = w_opt[1::5]
@@ -74,9 +74,10 @@ def plot_multiple_shooting(w_opt, Ts, T):
     plt.plot(tgrid, x2_opt, '--.')
     plt.plot(tgrid, x3_opt, '-..')
     plt.plot(tgrid, x4_opt, '--.')
-    plt.step(tgrid, vertcat(DM.nan(1), u_opt), '-.')
+    plt.plot(tgrid, vertcat(DM.nan(1), u_opt), '-.')
     plt.xlabel('t')
     plt.legend(['x', 'theta', 'x_dot', 'theta_dot', 'u'])
+    plt.title(title)
     plt.grid()
     plt.show()
 

@@ -48,10 +48,10 @@ def run_newton_step(H, d_g_x, d_phi_x, g_x, w, lambd):
 
     # Extract step for w and y
     delta_w = delta[:w.size1()]
-    delta_lambd = delta[w.size1():]
+    lambd_qp = delta[w.size1():]
 
     # Update estimates of w and y
     w_new = w + delta_w
-    lambd_new = lambd + delta_lambd
+    lambd_new = lambd_qp
 
     return w_new, lambd_new
